@@ -28,6 +28,7 @@ class User(BaseModel):
     username: str
     email: str
     avatar: str
+    role: str
 
     model_config = ConfigDict(from_attributes=True)
 

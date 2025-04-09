@@ -27,6 +27,7 @@ class Contact(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
     user: Mapped["User"] = relationship(back_populates="contacts")
 
+
 class User(Base):
     __tablename__ = "users"
 
@@ -37,4 +38,5 @@ class User(Base):
     created_at: Mapped[DateTime] = mapped_column(DateTime, default=func.now())
     avatar: Mapped[str] = mapped_column(String(255), nullable=True)
     confirmed = mapped_column(Boolean, default=False)
+    role: Mapped[str] = mapped_column(String(255), nullable=False, default="user")
     contacts: Mapped[list["Contact"]] = relationship("Contact", back_populates="user", cascade="all, delete")

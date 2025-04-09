@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.conf.config import settings
 from src.database.db import get_db
 from src.schemas import User
-from src.services.auth import get_current_user
+from src.services.auth import get_current_user, check_admin
 from src.services.upload_file import UploadFileService
 from src.services.users import UserService
 
@@ -28,6 +28,7 @@ async def update_avatar_user(
         file: UploadFile = File(),
         user: User = Depends(get_current_user),
         db: AsyncSession = Depends(get_db),
+        admin_user: User = Depends(check_admin)
 ):
     avatar_url = UploadFileService(
         settings.CLD_NAME, settings.CLD_API_KEY, settings.CLD_API_SECRET
