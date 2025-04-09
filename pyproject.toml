@@ -36,6 +36,9 @@ redis = "^5.2.1"
 redis-lru = "^0.1.2"
 
 
+[tool.poetry.group.dev.dependencies]
+sphinx = "^8.2.3"
+
 [tool.ruff]
 # Exclude a variety of commonly ignored directories.
 exclude = [

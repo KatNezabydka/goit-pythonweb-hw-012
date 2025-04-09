@@ -27,20 +27,27 @@ make setup
 source venv/bin/activate
 ```
 
-## 3. Start PostgreSQL with Docker
+## 4. Start PostgreSQL with Docker
 
 ```bash
 docker compose up -d
 ```
 
-## 4. Create migration
+## 5. Create migration
 
 ```bash
 poetry run alembic revision --autogenerate -m 'Init'
 ```
 
-## 5. Run migration
+## 6. Run migration
 
 ```bash
 poetry run alembic upgrade head
 ```
+
+## 7. Generate doc block
+
+```bash
+cd docs
+make html
+ ```
