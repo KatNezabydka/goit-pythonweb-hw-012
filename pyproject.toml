@@ -1,0 +1,70 @@
+[project]
+name = "contacts"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "kateryna_kornysheva",email = "k.kornysheva@betinvest.com"}
+]
+readme = "README.md"
+requires-python = ">=3.12"
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+logging = "^0.4.9.6"
+fastapi = "^0.115.12"
+uvicorn = "^0.34.0"
+psycopg2-binary = "^2.9.10"
+asyncpg = "^0.30.0"
+sqlalchemy = "^2.0.40"
+greenlet = "^3.1.1"
+pydantic = "^2.11.1"
+alembic = "^1.15.2"
+python-jose = {extras = ["cryptography"], version = "^3.4.0"}
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+libgravatar = "^1.0.4"
+python-multipart = "^0.0.20"
+python-dotenv = "^1.1.0"
+pydantic-settings = "^2.8.1"
+slowapi = "^0.1.9"
+fastapi-mail = "^1.4.2"
+bcrypt = "3.2.0"
+cloudinary = "^1.43.0"
+redis = "^5.2.1"
+redis-lru = "^0.1.2"
+
+
+[tool.ruff]
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+]
+
+target-version = "py312"
