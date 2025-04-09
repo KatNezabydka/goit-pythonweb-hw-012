@@ -1,17 +1,24 @@
-from fastapi import APIRouter, Request, BackgroundTasks, Depends, HTTPException, status
+import json
+from pathlib import Path
+
+from fastapi import APIRouter, Request, BackgroundTasks, Depends, HTTPException, status, Form
 from pydantic import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import OAuth2PasswordRequestForm
+from starlette.responses import HTMLResponse
+from starlette.templating import Jinja2Templates
 
 from src.conf.config import settings
-from src.database import redis
 from src.schemas import UserCreate, Token, User, RequestEmail
 from src.services.auth import create_access_token, Hash, get_email_from_token, create_email_token
 from src.services.users import UserService
 from src.database.db import get_db
-from src.services.email import send_email
+from src.services.email import send_email, send_reset_email
+from src.database.redis import redis_client
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+BASE_DIR = Path(__file__).resolve().parent.parent
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 
 @router.post("/register", response_model=User, status_code=status.HTTP_201_CREATED)
@@ -107,3 +114,75 @@ async def request_email(
             send_email, user.email, user.username, request.base_url
         )
     return {"message": "Please check your email for verification"}
+
+
+@router.post("/forgot-password")
+async def forgot_password(
+        email: EmailStr,
+        background_tasks: BackgroundTasks,
+        request: Request,
+        db: AsyncSession = Depends(get_db)
+):
+    user_service = UserService(db)
+    user = await user_service.get_user_by_email(email)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User with this email does not exist"
+        )
+
+    token_data = {"sub": user.email}
+    token = create_email_token(token_data)
+
+    user_schema = User.model_validate(user)
+    await redis_client.set(token, json.dumps(user_schema.model_dump()), ex=settings.REDIS_EXPIRE_SECONDS)
+
+    reset_link = f"{request.base_url}api/auth/reset-password?token={token}"
+
+    background_tasks.add_task(send_reset_email, user.email, reset_link, user.username, request.base_url)
+
+    return {"msg": "Password reset email sent"}
+
+
+@router.get("/reset-password", response_class=HTMLResponse)
+async def reset_password_form(request: Request, token: str):
+    return templates.TemplateResponse("reset_form.html", {"request": request, "token": token})
+
+
+@router.post("/reset-password")
+async def reset_password(
+        token: str = Form(...),
+        new_password: str = Form(...),
+        db: AsyncSession = Depends(get_db)
+):
+    try:
+        await get_email_from_token(token)
+    except HTTPException:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired token"
+        )
+
+    cached_user_data = await redis_client.get(token)
+    if not cached_user_data:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token is invalid or expired"
+        )
+
+    user_data = User.model_validate(json.loads(cached_user_data))
+
+    user_service = UserService(db)
+    user = await user_service.get_user_by_email(user_data.email)
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    hashed_password = Hash().get_password_hash(new_password)
+    user.hashed_password = hashed_password
+
+    await db.commit()
+
+    await redis_client.delete(token)
+
+    return {"msg": "Password successfully reset"}

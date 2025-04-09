@@ -69,13 +69,12 @@ async def get_current_user(
         raise credentials_exception
 
     user_service = UserService(db)
-    user_obj = await user_service.get_user_by_username(username)
-    if user_obj is None:
+    user = await user_service.get_user_by_username(username)
+    if user is None:
         raise credentials_exception
 
-    user = User.model_validate(user_obj)
-
-    await redis_client.set(token, user.model_dump_json(), ex=settings.REDIS_EXPIRE_SECONDS)
+    user_schema = User.model_validate(user)
+    await redis_client.set(token, json.dumps(user_schema.model_dump()), ex=settings.REDIS_EXPIRE_SECONDS)
 
     return user
 

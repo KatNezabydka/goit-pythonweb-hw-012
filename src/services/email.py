@@ -18,7 +18,7 @@ conf = ConnectionConfig(
     MAIL_SSL_TLS=settings.MAIL_SSL_TLS,
     USE_CREDENTIALS=settings.USE_CREDENTIALS,
     VALIDATE_CERTS=settings.VALIDATE_CERTS,
-    TEMPLATE_FOLDER=Path(__file__).parent / "templates",
+    TEMPLATE_FOLDER=Path(__file__).resolve().parent.parent / "templates",
 )
 
 
@@ -38,5 +38,24 @@ async def send_email(email: EmailStr, username: str, host: str):
 
         fm = FastMail(conf)
         await fm.send_message(message, template_name="verify_email.html")
+    except ConnectionErrors as err:
+        print(err)
+
+
+async def send_reset_email(email: EmailStr, reset_link: str, username: str, host):
+    try:
+        message = MessageSchema(
+            subject="Reset your email",
+            recipients=[email],
+            template_body={
+                "host": host,
+                "username": username,
+                "reset_link": reset_link
+            },
+            subtype=MessageType.html,
+        )
+
+        fm = FastMail(conf)
+        await fm.send_message(message, template_name="reset_password.html")
     except ConnectionErrors as err:
         print(err)

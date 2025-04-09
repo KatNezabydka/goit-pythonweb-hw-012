@@ -10,8 +10,7 @@ class ContactModel(BaseModel):
     birthday: date | None = Field(None)
     additional_info: str | None = Field(None, max_length=255)
 
-
-model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True)
 
 
 class ContactUpdate(ContactModel):
@@ -44,6 +43,7 @@ class UserCreate(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
 
 class RequestEmail(BaseModel):
     email: EmailStr
