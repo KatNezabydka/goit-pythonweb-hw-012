@@ -51,3 +51,8 @@ poetry run alembic upgrade head
 cd docs
 make html
  ```
+## 7. Run tests
+
+```bash
+poetry run pytest
+ ```
