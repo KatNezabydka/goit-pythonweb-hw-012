@@ -1,13 +1,18 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from src.repository.contacts import ContactRepository
 from src.database.models import Contact, User
 from src.schemas import ContactModel, ContactUpdate
 
 
+
 @pytest.fixture
 def session_mock():
-    return AsyncMock()
+    session_mock = AsyncMock(spec=AsyncSession)
+    return session_mock
 
 
 @pytest.fixture
@@ -27,19 +32,24 @@ def fake_contact():
 
 @pytest.mark.asyncio
 async def test_get_contacts(contact_repo, session_mock, fake_user, fake_contact):
-    # Мокируем execute() для возвращения результата
-    mock_scalars = AsyncMock()
-    mock_scalars.all = AsyncMock(return_value=[fake_contact])
-    session_mock.execute.return_value.scalars = mock_scalars
+    mock_result = MagicMock()
+    mock_result.scalars.return_value.all.return_value = [fake_contact]
+
+    session_mock.execute = AsyncMock(return_value=mock_result)
 
     result = await contact_repo.get_contacts(skip=0, limit=10, user=fake_user)
-    assert result == [fake_contact]
+
+    assert len(result) == 1
+    assert result[0] == fake_contact
 
 
 @pytest.mark.asyncio
 async def test_get_contact_by_id(contact_repo, session_mock, fake_user, fake_contact):
-    # Мокируем execute() для возвращения fake_contact
-    session_mock.execute.return_value.scalar_one_or_none.return_value = fake_contact
+    mock_result = MagicMock()
+    mock_result.scalar_one_or_none.return_value = fake_contact
+
+    session_mock.execute = AsyncMock(return_value=mock_result)
+
     result = await contact_repo.get_contact_by_id(contact_id=1, user=fake_user)
     assert result == fake_contact
 
@@ -85,25 +95,24 @@ async def test_remove_contact(contact_repo, session_mock, fake_user, fake_contac
 
 @pytest.mark.asyncio
 async def test_search_contacts(contact_repo, session_mock, fake_user, fake_contact):
-    # Мокируем execute() для возвращения результата
-    mock_scalars = AsyncMock()
-    mock_scalars.all = AsyncMock(return_value=[fake_contact])
-    session_mock.execute.return_value.scalars = mock_scalars
+    mock_result = MagicMock()
+    mock_result.scalars.return_value.all.return_value = [fake_contact]
+
+    session_mock.execute = AsyncMock(return_value=mock_result)
 
     result = await contact_repo.search_contacts(user=fake_user, first_name="John")
-
-    assert isinstance(result, list)
+    assert len(result) == 1
     assert result[0] == fake_contact
 
 
 @pytest.mark.asyncio
 async def test_get_contacts_upcoming_birthday(contact_repo, session_mock, fake_user, fake_contact):
-    # Мокируем execute() для возвращения результата
-    mock_scalars = AsyncMock()
-    mock_scalars.all = AsyncMock(return_value=[fake_contact])
-    session_mock.execute.return_value.scalars = mock_scalars
+    mock_result = MagicMock()
+    mock_result.scalars.return_value.all.return_value = [fake_contact]
+
+    session_mock.execute = AsyncMock(return_value=mock_result)
 
     result = await contact_repo.get_contacts_upcoming_birthday(user=fake_user)
 
-    assert isinstance(result, list)
+    assert len(result) == 1
     assert result[0] == fake_contact

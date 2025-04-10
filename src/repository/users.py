@@ -76,7 +76,7 @@ class UserRepository:
         self.db.add(user)
         await self.db.commit()
         await self.db.refresh(user)
-        return user
+        return await self.get_user_by_id(user.id)
 
     async def confirmed_email(self, email: str) -> None:
         """

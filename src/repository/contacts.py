@@ -62,7 +62,10 @@ class ContactRepository:
         Returns:
             Contact: The created contact.
         """
-        contact = Contact(**body.model_dump(exclude_unset=True), user=user)
+        contact = Contact(
+            **body.model_dump(exclude_unset=True),
+            user=user
+        )
         self.db.add(contact)
         await self.db.commit()
         await self.db.refresh(contact)
@@ -82,7 +85,7 @@ class ContactRepository:
         """
         contact = await self.get_contact_by_id(contact_id, user)
         if contact:
-            for key, value in body.dict().items():
+            for key, value in body.model_dump().items():
                 setattr(contact, key, value)
 
             await self.db.commit()
