@@ -55,4 +55,10 @@ make html
 
 ```bash
 poetry run pytest
+poetry run pytest -v tests/test_integration_auth.py
+ 
+ ```## 8. Check test coverage
+
+```bash
+pytest --cov=src tests/ --cov-report=html
  ```

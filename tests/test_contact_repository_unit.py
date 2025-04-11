@@ -36,7 +36,6 @@ async def test_get_contacts(contact_repo, session_mock, fake_user, fake_contact)
     mock_result.scalars.return_value.all.return_value = [fake_contact]
 
     session_mock.execute = AsyncMock(return_value=mock_result)
-
     result = await contact_repo.get_contacts(skip=0, limit=10, user=fake_user)
 
     assert len(result) == 1
@@ -109,9 +108,7 @@ async def test_search_contacts(contact_repo, session_mock, fake_user, fake_conta
 async def test_get_contacts_upcoming_birthday(contact_repo, session_mock, fake_user, fake_contact):
     mock_result = MagicMock()
     mock_result.scalars.return_value.all.return_value = [fake_contact]
-
     session_mock.execute = AsyncMock(return_value=mock_result)
-
     result = await contact_repo.get_contacts_upcoming_birthday(user=fake_user)
 
     assert len(result) == 1

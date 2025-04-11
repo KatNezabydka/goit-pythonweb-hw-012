@@ -3,4 +3,5 @@ venv
 postgres-data
 __pycache__/
 .env
-.idea
+.coverage
+test.db

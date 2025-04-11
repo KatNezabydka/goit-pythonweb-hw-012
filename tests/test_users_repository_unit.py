@@ -85,9 +85,7 @@ async def test_confirmed_email(repository, session_mock, fake_user):
 @pytest.mark.asyncio
 async def test_update_avatar_url(repository, session_mock, fake_user):
     repository.get_user_by_email = AsyncMock(return_value=fake_user)
-
     session_mock.refresh = AsyncMock()
-
     updated_user = await repository.update_avatar_url("test@example.com", "http://new.avatar")
 
     assert updated_user.avatar == "http://new.avatar"

@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 from fastapi import APIRouter, Request, BackgroundTasks, Depends, HTTPException, status, Form
+from fastapi import Body
 from pydantic import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.security import OAuth2PasswordRequestForm
@@ -173,7 +174,7 @@ async def request_email(
 
 @router.post("/forgot-password")
 async def forgot_password(
-        email: EmailStr,
+        email: str,
         background_tasks: BackgroundTasks,
         request: Request,
         db: AsyncSession = Depends(get_db)
@@ -228,7 +229,7 @@ async def reset_password_form(request: Request, token: str):
     Returns:
         HTMLResponse: The rendered reset form.
     """
-    return templates.TemplateResponse("reset_form.html", {"request": request, "token": token})
+    return templates.TemplateResponse(request, "reset_form.html", {"token": token})
 
 
 @router.post("/reset-password")
